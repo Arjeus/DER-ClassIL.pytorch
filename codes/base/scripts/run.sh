@@ -1,11 +1,15 @@
-#!/usr/bin/env bash
+#!/bin/sh
+
+# Change to the base directory (parent of scripts directory)
+cd "$(dirname "$0")/.."
+
 name='10scifar100_trial0_debug'
 debug='1'
 comments='None'
 expid='1'
 
-
-if [ ${debug} -eq '0' ]; then
+# Now we're in the base directory, so Python can find the main module
+if [ "${debug}" = "0" ]; then
     python -m main train with "./configs/${expid}.yaml" \
         exp.name="${name}" \
         exp.savedir="./logs/" \
@@ -18,7 +22,6 @@ if [ ${debug} -eq '0' ]; then
         -c "${comments}" \
         --force \
         --mongo_db=10.10.10.100:30620:classil
-        # --mongo_db=10.10.10.100:30620:classil
 else
     python -m main train with "./configs/${expid}.yaml" \
         exp.name="${name}" \
@@ -29,6 +32,6 @@ else
         --name="${name}" \
         -D \
         -p \
-        --force \
-        #--mongo_db=10.10.10.100:30620:debug
+        --force 
+    # --mongo_db=10.10.10.100:30620:debug
 fi

@@ -152,7 +152,7 @@ class iImageNet(DataHandler):
     transform_type = 'albumentations'
     if transform_type == 'albumentations':
         train_transforms = A.Compose([
-            A.RandomResizedCrop(224, 224),
+            A.RandomResizedCrop(size=(224, 224)),
             A.HorizontalFlip(),
             A.Normalize(
                 mean=[0.485, 0.456, 0.406],
@@ -254,7 +254,7 @@ class iImageNet100(DataHandler):
     transform_type = 'albumentations'
     if transform_type == 'albumentations':
         train_transforms = A.Compose([
-            A.RandomResizedCrop(224, 224),
+            A.RandomResizedCrop(size=(224, 224)),
             A.HorizontalFlip(),
             # A.ColorJitter(brightness=63 / 255),
             A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
