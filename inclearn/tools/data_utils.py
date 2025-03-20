@@ -12,7 +12,7 @@ def construct_balanced_subset(x, y):
     for i in range(len(xdata)):
         if xdata[i].shape[0] < minsize:
             import pdb
-            pdb.set_trace()
+            # pdb.set_trace()
         idx = np.arange(xdata[i].shape[0])
         np.random.shuffle(idx)
         xdata[i] = xdata[i][idx][:minsize]

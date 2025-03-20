@@ -7,6 +7,7 @@ from albumentations.pytorch import ToTensorV2
 
 from torchvision import datasets, transforms
 import torch
+from sklearn import datasets as skdatasets
 
 
 def get_datasets(dataset_names):
@@ -22,6 +23,8 @@ def get_dataset(dataset_name):
         return iImageNet100
     elif dataset_name == "imagenet":
         return iImageNet
+    elif dataset_name == "digits":
+        return iDigits
     else:
         raise NotImplementedError("Unknown dataset {}.".format(dataset_name))
 
@@ -304,3 +307,57 @@ class iImageNet100(DataHandler):
             98, 97, 2, 64, 66, 42, 22, 35, 86, 24, 34, 87, 21, 99, 0, 88, 27, 18, 94, 11, 12, 47, 25, 30, 46, 62, 69,
             36, 61, 7, 63, 75, 5, 32, 4, 51, 48, 73, 93, 39, 67, 29, 49, 57, 33
         ]
+
+
+class iDigits(DataHandler):
+    """Handler for the scikit-learn handwritten digits dataset (8x8 images of digits)"""
+    
+    base_dataset_cls = None  # We'll load directly from sklearn
+    transform_type = 'torchvision'
+    train_transforms = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,)),
+    ])
+    test_transforms = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,)),
+    ])
+    def __init__(self, data_folder, train, is_fine_label=False):
+        """Load the scikit-learn digits dataset and split it into train/test"""
+        digits = skdatasets.load_digits()
+        self.data = digits.data  # shape: (n_samples, 64) features
+        self.targets = digits.target.astype(np.int64)  # shape: (n_samples,) labels 0-9
+        self.n_cls = 10
+        
+        # Ensure all targets are in the expected range (0-9)
+        valid_mask = (self.targets >= 0) & (self.targets < 10)
+        if not np.all(valid_mask):
+            print(f"Warning: found {np.sum(~valid_mask)} targets outside the 0-9 range - filtering them out")
+            self.data = self.data[valid_mask]
+            self.targets = self.targets[valid_mask]
+        
+        # Split data into train/test sets (70% train, 30% test)
+        n_samples = len(self.data)
+        indices = np.random.permutation(n_samples)
+        split_point = int(0.7 * n_samples)
+        
+        if train:
+            self.data = self.data[indices[:split_point]]
+            self.targets = self.targets[indices[:split_point]]
+        else:
+            self.data = self.data[indices[split_point:]]
+            self.targets = self.targets[indices[split_point:]]
+            
+        # Debug info to help diagnose any future issues
+        print(f"Loaded digits dataset for {'training' if train else 'testing'}")
+        print(f"Number of samples: {len(self.data)}")
+        print(f"Unique target values: {np.unique(self.targets)}")
+        
+    @property
+    def is_proc_inc_data(self):
+        return False
+    
+    @classmethod
+    def class_order(cls, trial_i):
+        """Return the class order to use for incremental training"""
+        return list(range(10))  # digits 0-9 in order

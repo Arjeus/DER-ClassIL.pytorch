@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 # Change to the base directory (parent of scripts directory)
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 
-name='10scifar100_trial0_debug'
+name='Digits_DER'
 debug='1'
 comments='None'
-expid='1'
+expid='digits'
 
 # Now we're in the base directory, so Python can find the main module
-if [ "${debug}" = "0" ]; then
+if [ "$debug" = "0" ]; then
     python -m main train with "./configs/${expid}.yaml" \
         exp.name="${name}" \
         exp.savedir="./logs/" \

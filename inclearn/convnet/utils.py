@@ -5,6 +5,9 @@ from torch.optim import SGD
 import torch.nn.functional as F
 from inclearn.tools.metrics import ClassErrorMeter, AverageValueMeter
 
+def to_onehot(targets, n_class):
+    return torch.eye(n_class)[targets].cuda()
+
 
 def finetune_last_layer(
     logger,
@@ -41,7 +44,9 @@ def finetune_last_layer(
         total_correct = 0.0
         total_count = 0
         # print(f"dataset loader length {len(loader.dataset)}")
-        for inputs, targets in loader:
+        for batch in loader:
+            # Unpack x, y and ignore the memory_flag (third value)
+            inputs, targets = batch[0], batch[1]
             inputs, targets = inputs.cuda(), targets.cuda()
             if loss_type == "bce":
                 targets = to_onehot(targets, n_class)
@@ -59,7 +64,9 @@ def finetune_last_layer(
             test_correct = 0.0
             test_count = 0.0
             with torch.no_grad():
-                for inputs, targets in test_loader:
+                for batch in test_loader:
+                    # Unpack x, y and ignore the memory_flag (third value)
+                    inputs, targets = batch[0], batch[1]
                     outputs = network(inputs.cuda())['logit']
                     _, preds = outputs.max(1)
                     test_correct += (preds.cpu() == targets).sum().item()
@@ -80,7 +87,9 @@ def extract_features(model, loader):
     targets, features = [], []
     model.eval()
     with torch.no_grad():
-        for _inputs, _targets in loader:
+        for batch in loader:
+            # Unpack x, y and ignore the memory_flag (third value)
+            _inputs, _targets = batch[0], batch[1]
             _inputs = _inputs.cuda()
             _targets = _targets.numpy()
             _features = model(_inputs)['feature'].detach().cpu().numpy()
@@ -111,7 +120,9 @@ def update_classes_mean(network, inc_dataset, n_classes, task_size, share_memory
     count = np.zeros(n_classes)
     network.eval()
     with torch.no_grad():
-        for x, y in loader:
+        for batch in loader:
+            # Unpack x, y and ignore the memory_flag (third value)
+            x, y = batch[0], batch[1]
             feat = network(x.cuda())['feature']
             for lbl in torch.unique(y):
                 class_means[lbl] += feat[y == lbl].sum(0).cpu().numpy()

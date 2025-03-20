@@ -128,16 +128,25 @@ class ResNet(nn.Module):
                     nn.ReLU(inplace=True),
                     nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
                 )
-
+        elif 'digits' in dataset:
+            # Special case for digits dataset (8x8 single-channel images)
+            self.conv1 = nn.Sequential(
+                nn.Conv2d(1, nf, kernel_size=3, stride=1, padding=1, bias=False),
+                nn.BatchNorm2d(nf),
+                nn.ReLU(inplace=True)
+                # should there be MaxPool2D? here
+            )
+        else:
+            raise ValueError(f"Unsupported dataset: {dataset}")
+            
         self.layer1 = self._make_layer(block, 1 * nf, layers[0])
         self.layer2 = self._make_layer(block, 2 * nf, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 4 * nf, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 8 * nf, layers[3], stride=2, remove_last_relu=remove_last_relu)
-
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-
         self.out_dim = 8 * nf * block.expansion
-
+        
+        # Initialize weights
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -145,9 +154,7 @@ class ResNet(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-        # Zero-initialize the last BN in each residual branch,
-        # so that the residual branch starts with zeros, and each residual block behaves like an identity.
-        # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
+        # Zero-initialize the last BN in each residual branch
         if zero_init_residual:
             for m in self.modules():
                 if isinstance(m, Bottleneck):

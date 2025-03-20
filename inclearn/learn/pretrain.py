@@ -43,7 +43,7 @@ def train(cfg, model, optimizer, device, train_loader):
         if torch.isnan(loss):
             import pdb
 
-            pdb.set_trace()
+            # pdb.set_trace()
 
         loss.backward()
         optimizer.step()
@@ -69,9 +69,9 @@ def test(cfg, model, device, test_loader):
             if accu is not None:
                 accu.add(logits.detach(), targets)
             loss = _compute_loss(cfg, logits, targets, device)
-            if torch.isnan(loss):
-                import pdb
-                pdb.set_trace()
+            # if torch.isnan(loss):
+            #     import pdb
+            #     pdb.set_trace()
 
             _loss = _loss + loss
     return round(_loss.item() / i, 3), round(accu.value()[0], 3)

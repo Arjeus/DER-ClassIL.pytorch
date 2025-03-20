@@ -158,7 +158,7 @@ class Weight_Align(IncrementalLearner):
 
                 if not utils.check_loss(loss):
                     import pdb
-                    pdb.set_trace()
+                    # pdb.set_trace()
 
                 loss.backward()
                 self._optimizer.step()

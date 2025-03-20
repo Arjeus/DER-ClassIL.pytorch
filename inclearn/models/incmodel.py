@@ -151,16 +151,13 @@ class IncModel(IncrementalLearner):
 
     def _train_task(self, train_loader, val_loader):
         self._ex.logger.info(f"nb {len(train_loader.dataset)}")
-
         topk = 5 if self._n_classes > 5 else self._task_size
         accu = ClassErrorMeter(accuracy=True, topk=[1, topk])
         train_new_accu = ClassErrorMeter(accuracy=True)
         train_old_accu = ClassErrorMeter(accuracy=True)
-
         utils.display_weight_norm(self._ex.logger, self._parallel_network, self._increments, "Initial trainset")
         utils.display_feature_norm(self._ex.logger, self._parallel_network, train_loader, self._n_classes,
                                    self._increments, "Initial trainset")
-
         self._optimizer.zero_grad()
         self._optimizer.step()
 
@@ -175,7 +172,10 @@ class IncModel(IncrementalLearner):
                     self._network.classifier.reset_parameters()
                     if self._cfg['use_aux_cls']:
                         self._network.aux_classifier.reset_parameters()
-            for i, (inputs, targets) in enumerate(train_loader, start=1):
+            for i, batch in enumerate(train_loader, start=1):
+                # Unpack x, y and ignore the memory_flag (third value)
+                inputs, targets = batch[0], batch[1]
+                
                 self.train()
                 self._optimizer.zero_grad()
                 old_classes = targets < (self._n_classes - self._task_size)
@@ -189,7 +189,6 @@ class IncModel(IncrementalLearner):
                     new_accu=train_new_accu,
                     old_accu=train_old_accu,
                 )
-
                 if self._cfg["use_aux_cls"] and self._task > 0:
                     loss = loss_ce + loss_aux
                 else:
@@ -197,7 +196,7 @@ class IncModel(IncrementalLearner):
 
                 if not utils.check_loss(loss):
                     import pdb
-                    pdb.set_trace()
+                    # pdb.set_trace()
 
                 loss.backward()
                 self._optimizer.step()
@@ -232,7 +231,6 @@ class IncModel(IncrementalLearner):
 
         # For the large-scale dataset, we manage the data in the shared memory.
         self._inc_dataset.shared_data_inc = train_loader.dataset.share_memory
-
         utils.display_weight_norm(self._ex.logger, self._parallel_network, self._increments, "After training")
         utils.display_feature_norm(self._ex.logger, self._parallel_network, train_loader, self._n_classes,
                                    self._increments, "Trainset")
@@ -343,7 +341,9 @@ class IncModel(IncrementalLearner):
         preds, targets = [], []
         self._parallel_network.eval()
         with torch.no_grad():
-            for i, (inputs, lbls) in enumerate(data_loader):
+            for i, batch in enumerate(data_loader):
+                # Unpack x, y and ignore the memory_flag (third value)
+                inputs, lbls = batch[0], batch[1]
                 inputs = inputs.to(self._device, non_blocking=True)
                 _preds = self._parallel_network(inputs)['logit']
                 if self._cfg["postprocessor"]["enable"] and self._task > 0:

@@ -1,0 +1,171 @@
+{
+  "config": {
+    "exp": {
+      "name": "Digits_DER",
+      "savedir": "./logs",
+      "tensorboard_dir": "./tensorboard/",
+      "debug": true,
+      "ckptdir": "./logs/"
+    },
+    "model": "incmodel",
+    "convnet": "resnet18",
+    "train_head": "softmax",
+    "infer_head": "softmax",
+    "channel": 64,
+    "use_bias": false,
+    "last_relu": false,
+    "der": true,
+    "use_aux_cls": true,
+    "aux_n+1": true,
+    "distillation": "none",
+    "reuse_oldfc": false,
+    "weight_normalization": false,
+    "val_per_n_epoch": -1,
+    "save_ckpt": true,
+    "display_norm": false,
+    "task_max": 5,
+    "lr_min": 5e-05,
+    "lr": 0.01,
+    "weight_decay": 0.0005,
+    "dynamic_weight_decay": false,
+    "scheduler": "multistep",
+    "scheduling": [
+      30,
+      45
+    ],
+    "lr_decay": 0.1,
+    "optimizer": "sgd",
+    "epochs": 50,
+    "postprocessor": {
+      "enable": false,
+      "type": "bic",
+      "epochs": 1,
+      "batch_size": 32,
+      "lr": 0.1,
+      "scheduling": [
+        20,
+        30,
+        40
+      ],
+      "lr_decay_factor": 0.1,
+      "weight_decay": 0.0005
+    },
+    "decouple": {
+      "enable": true,
+      "epochs": 15,
+      "fullset": false,
+      "lr": 0.01,
+      "scheduling": [
+        7
+      ],
+      "lr_decay": 0.1,
+      "weight_decay": 0.0005,
+      "temperature": 2.0
+    },
+    "dataset": "digits",
+    "trial": 0,
+    "increment": 2,
+    "batch_size": 32,
+    "workers": 4,
+    "validation": 0.1,
+    "random_classes": false,
+    "start_class": 0,
+    "start_task": 0,
+    "max_task": 5,
+    "coreset_strategy": "random",
+    "mem_size_mode": "uniform_fixed_total_mem",
+    "memory_size": 200,
+    "fixed_memory_per_cls": 20,
+    "seed": 1993,
+    "load_mem": false,
+    "pretrain": {
+      "epochs": 50,
+      "lr": 0.01,
+      "lr_decay": 0.1,
+      "scheduling": [
+        20,
+        35,
+        45
+      ],
+      "weight_decay": 0.0005
+    },
+    "resampling": false,
+    "save_mem": true,
+    "temperature": 2,
+    "warmup": true,
+    "warmup_epochs": 5,
+    "data_folder": "/home/arjay55/code/DER-ClassIL.pytorch/data"
+  },
+  "results": [
+    {
+      "top1": {
+        "total": 100.0,
+        "00-01": 100.0
+      },
+      "top5": {
+        "total": 100.0,
+        "00-01": 100.0
+      }
+    },
+    {
+      "top1": {
+        "total": 100.0,
+        "00-01": 100.0,
+        "02-03": 100.0
+      },
+      "top5": {
+        "total": 100.0,
+        "00-01": 100.0,
+        "02-03": 100.0
+      }
+    },
+    {
+      "top1": {
+        "total": 99.702,
+        "00-01": 100.0,
+        "02-03": 100.0,
+        "04-05": 99.115
+      },
+      "top5": {
+        "total": 100.0,
+        "00-01": 100.0,
+        "02-03": 100.0,
+        "04-05": 99.115
+      }
+    },
+    {
+      "top1": {
+        "total": 99.545,
+        "00-01": 100.0,
+        "02-03": 99.038,
+        "04-05": 99.115,
+        "06-07": 100.0
+      },
+      "top5": {
+        "total": 100.0,
+        "00-01": 100.0,
+        "02-03": 100.0,
+        "04-05": 99.115,
+        "06-07": 100.0
+      }
+    },
+    {
+      "top1": {
+        "total": 98.889,
+        "00-01": 99.16,
+        "02-03": 99.038,
+        "04-05": 98.23,
+        "06-07": 100.0,
+        "08-09": 98.0
+      },
+      "top5": {
+        "total": 100.0,
+        "00-01": 100.0,
+        "02-03": 100.0,
+        "04-05": 99.115,
+        "06-07": 100.0,
+        "08-09": 99.0
+      }
+    }
+  ]
+}

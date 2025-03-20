@@ -6,6 +6,7 @@ from inclearn import models
 from inclearn.convnet import resnet, cifar_resnet, modified_resnet_cifar, preact_resnet
 from inclearn.datasets import data
 
+import pdb
 
 def get_optimizer(params, optimizer, lr, weight_decay=0.0):
     if optimizer == "adam":
@@ -49,10 +50,8 @@ def get_data(cfg, trial_i):
         batch_size=cfg["batch_size"],
         workers=cfg["workers"],
         validation_split=cfg["validation"],
-        resampling=cfg["resampling"],
         increment=cfg["increment"],
         data_folder=cfg["data_folder"],
-        start_class=cfg["start_class"],
     )
 
 

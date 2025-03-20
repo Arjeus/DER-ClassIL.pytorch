@@ -26,7 +26,9 @@ def get_class_loss(network, cur_n_cls, loader):
     EPS = 1e-10
     task_size = 10
     network.eval()
-    for x, y in loader:
+    for batch in loader:
+        # Unpack x, y and ignore the memory_flag (third value)
+        x, y = batch[0], batch[1]
         x, y = x.cuda(), y.cuda()
         preds = network(x)['logit'].softmax(dim=1)
         # preds[:,-task_size:] = preds[:,-task_size:].softmax(dim=1)
@@ -46,7 +48,9 @@ def get_featnorm_grouped_by_class(network, cur_n_cls, loader):
     feat_norms = np.zeros(cur_n_cls)
     network.eval()
     with torch.no_grad():
-        for x, y in loader:
+        for batch in loader:
+            # Unpack x, y and ignore the memory_flag (third value)
+            x, y = batch[0], batch[1]
             x = x.cuda()
             feat = network(x)['feature'].cpu()
             for i, lbl in enumerate(y):
