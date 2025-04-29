@@ -11,7 +11,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
 
-
 class DownsampleA(nn.Module):
     def __init__(self, nIn, nOut, stride):
         super(DownsampleA, self).__init__()
@@ -30,7 +29,6 @@ class ResNetBasicblock(nn.Module):
     """
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super(ResNetBasicblock, self).__init__()
-
         self.conv_a = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn_a = nn.BatchNorm2d(planes)
 

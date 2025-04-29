@@ -25,6 +25,8 @@ def get_dataset(dataset_name):
         return iImageNet
     elif dataset_name == "digits":
         return iDigits
+    elif dataset_name == "iris":
+        return iIris
     else:
         raise NotImplementedError("Unknown dataset {}.".format(dataset_name))
 
@@ -361,3 +363,27 @@ class iDigits(DataHandler):
     def class_order(cls, trial_i):
         """Return the class order to use for incremental training (5 tasks of 2 digits each)"""
         return list(range(10))
+
+
+class iIris(DataHandler):
+    """Dataset handler for Iris dataset."""
+    transform_type = None
+    train_transforms = None
+    test_transforms = None
+
+    def __init__(self, data_folder, train, is_fine_label=False):
+        # Load iris dataset from sklearn
+        from sklearn.datasets import load_iris
+        ds = load_iris()
+        self.data = ds.data.astype('float32')
+        self.targets = ds.target.astype('int64')
+        self.n_cls = 3
+
+    @property
+    def is_proc_inc_data(self):
+        return False
+
+    @classmethod
+    def class_order(cls, trial_i):
+        # Default order 0,1,2
+        return [0, 1, 2]

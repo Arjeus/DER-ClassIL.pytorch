@@ -421,6 +421,13 @@ class DummyDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         x, y, = self.x[idx], self.y[idx]
+        # Handle iris dataset (tabular data)
+        if self.dataset_name == 'iris':
+            import torch
+            x = torch.from_numpy(x).float()
+            # reshape per‑sample from [N] → [N,1,1]
+            x = x.unsqueeze(-1).unsqueeze(-1)
+            return x, y, self.memory_flags[idx]
         memory_flag = self.memory_flags[idx]
         
         # Handle different dataset types

@@ -85,7 +85,6 @@ def _train(cfg, _run, ex, tensorboard):
     inc_dataset = factory.get_data(cfg, trial_i)
     ex.logger.info("classes_order")
     ex.logger.info(inc_dataset.class_order)
-
     model = factory.get_model(cfg, trial_i, _run, ex, tensorboard, inc_dataset)
 
     if _run.meta_info["options"]["--file_storage"] is not None:
@@ -121,6 +120,7 @@ def _train(cfg, _run, ex, tensorboard):
             model._parallel_network.load_state_dict(state_dict)
             inc_dataset.shared_data_inc = train_loader.dataset.share_memory
         else:
+
             model.train_task(train_loader, val_loader)
         model.after_task(task_i, inc_dataset)
 

@@ -81,7 +81,6 @@ def train(_run, _rnd, _seed):
 def _train(cfg, _run, ex, tensorboard):
     device = factory.set_device(cfg)
     trial_i = cfg['trial']
-    pdb.set_trace()
     inc_dataset = factory.get_data(cfg, trial_i)
     ex.logger.info("classes_order")
     ex.logger.info(inc_dataset.class_order)

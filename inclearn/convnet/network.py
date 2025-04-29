@@ -1,5 +1,4 @@
 import copy
-import pdb
 
 import torch
 from torch import nn
@@ -33,19 +32,19 @@ class BasicNet(nn.Module):
         self.der = cfg['der']
         self.aux_nplus1 = cfg['aux_n+1']
         self.reuse_oldfc = cfg['reuse_oldfc']
-
+        self.cfg = cfg
         if self.der:
             print("Enable dynamical reprensetation expansion!")
             self.convnets = nn.ModuleList()
             self.convnets.append(
-                factory.get_convnet(convnet_type,
+                factory.get_convnet(cfg, convnet_type,
                                     nf=nf,
                                     dataset=dataset,
                                     start_class=self.start_class,
                                     remove_last_relu=self.remove_last_relu))
             self.out_dim = self.convnets[0].out_dim
         else:
-            self.convnet = factory.get_convnet(convnet_type,
+            self.convnet = factory.get_convnet(cfg, convnet_type,
                                                nf=nf,
                                                dataset=dataset,
                                                remove_last_relu=self.remove_last_relu)
@@ -112,7 +111,7 @@ class BasicNet(nn.Module):
 
     def _add_classes_multi_fc(self, n_classes):
         if self.ntask > 1:
-            new_clf = factory.get_convnet(self.convnet_type,
+            new_clf = factory.get_convnet(self.cfg, self.convnet_type,
                                           nf=self.nf,
                                           dataset=self.dataset,
                                           start_class=self.start_class,

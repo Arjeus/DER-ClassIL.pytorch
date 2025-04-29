@@ -4,7 +4,8 @@
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 from torch.nn import functional as F
-
+import torchvision.models as tvm
+import pdb
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
 
 model_urls = {
@@ -96,7 +97,6 @@ class Bottleneck(nn.Module):
 
         return out
 
-
 class ResNet(nn.Module):
     def __init__(self,
                  block,
@@ -105,39 +105,47 @@ class ResNet(nn.Module):
                  zero_init_residual=True,
                  dataset='cifar',
                  start_class=0,
-                 remove_last_relu=False):
+                 remove_last_relu=False,
+                 in_channels=3):
         super(ResNet, self).__init__()
         self.remove_last_relu = remove_last_relu
         self.inplanes = nf
+        self.in_channels = in_channels
+
         if 'cifar' in dataset:
-            self.conv1 = nn.Sequential(nn.Conv2d(3, nf, kernel_size=3, stride=1, padding=1, bias=False),
-                                       nn.BatchNorm2d(nf), nn.ReLU(inplace=True))
+            self.conv1 = nn.Sequential(
+                nn.Conv2d(self.in_channels, nf, kernel_size=3, stride=1, padding=1, bias=False),
+                 nn.BatchNorm2d(nf), nn.ReLU(inplace=True))
         elif 'imagenet' in dataset:
             if start_class == 0:
                 self.conv1 = nn.Sequential(
-                    nn.Conv2d(3, nf, kernel_size=7, stride=2, padding=3, bias=False),
-                    nn.BatchNorm2d(nf),
-                    nn.ReLU(inplace=True),
-                    nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+                    nn.Conv2d(self.in_channels, nf, kernel_size=7, stride=2, padding=3, bias=False),
+                     nn.BatchNorm2d(nf),
+                     nn.ReLU(inplace=True),
+                     nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
                 )
             else:
-                # Following PODNET implmentation
+                 # Following PODNET
                 self.conv1 = nn.Sequential(
-                    nn.Conv2d(3, nf, kernel_size=3, stride=1, padding=1, bias=False),
+                    nn.Conv2d(self.in_channels, nf, kernel_size=3, stride=1, padding=1, bias=False),
                     nn.BatchNorm2d(nf),
                     nn.ReLU(inplace=True),
                     nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
                 )
-        elif 'digits' in dataset:
-            # Special case for digits dataset (8x8 single-channel images)
+        elif 'digits' in dataset or 'iris' in dataset:
+            # Special case for digits (8×8) or iris (4‑feature → treated as 4‑channel 1×1 image)
             self.conv1 = nn.Sequential(
-                nn.Conv2d(1, nf, kernel_size=3, stride=1, padding=1, bias=False),
+                nn.Conv2d(self.in_channels, nf, kernel_size=3, stride=1, padding=1, bias=False),
+                 nn.BatchNorm2d(nf),
+                 nn.ReLU(inplace=True)
+             )
+        else:
+            # fallback ‑ treat any other tabular or small input the same
+            self.conv1 = nn.Sequential(
+                nn.Conv2d(self.in_channels, nf, kernel_size=3, stride=1, padding=1, bias=False),
                 nn.BatchNorm2d(nf),
                 nn.ReLU(inplace=True)
-                # should there be MaxPool2D? here
             )
-        else:
-            raise ValueError(f"Unsupported dataset: {dataset}")
             
         self.layer1 = self._make_layer(block, 1 * nf, layers[0])
         self.layer2 = self._make_layer(block, 2 * nf, layers[1], stride=2)

@@ -3,10 +3,10 @@
 # Change to the base directory (parent of scripts directory)
 cd "$(dirname "$0")/.." || exit 1
 
-name='Digits_DER'
+name='Iris_DER'
 debug='1'
 comments='None'
-expid='digits'
+expid='iris'
 
 # Now we're in the base directory, so Python can find the main module
 if [ "$debug" = "0" ]; then
