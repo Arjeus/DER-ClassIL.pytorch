@@ -359,5 +359,5 @@ class iDigits(DataHandler):
     
     @classmethod
     def class_order(cls, trial_i):
-        """Return the class order to use for incremental training"""
-        return list(range(10))  # digits 0-9 in order
+        """Return the class order to use for incremental training (5 tasks of 2 digits each)"""
+        return list(range(10))

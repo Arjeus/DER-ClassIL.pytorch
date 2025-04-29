@@ -9,3 +9,4 @@ __pycache__
 
 codes/base/ckpts/
 data/
+codes/base/results/*

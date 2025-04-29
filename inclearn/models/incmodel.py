@@ -161,6 +161,9 @@ class IncModel(IncrementalLearner):
         self._optimizer.zero_grad()
         self._optimizer.step()
 
+        # At the start of training
+        min_batch_size = 2
+
         for epoch in range(self._n_epochs):
             _loss, _loss_aux = 0.0, 0.0
             accu.reset()
@@ -176,6 +179,10 @@ class IncModel(IncrementalLearner):
                 # Unpack x, y and ignore the memory_flag (third value)
                 inputs, targets = batch[0], batch[1]
                 
+                # Skip small batches
+                if inputs.size(0) < min_batch_size:
+                    continue
+
                 self.train()
                 self._optimizer.zero_grad()
                 old_classes = targets < (self._n_classes - self._task_size)

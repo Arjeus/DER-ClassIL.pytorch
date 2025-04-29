@@ -16,6 +16,7 @@ import numpy as np
 import random
 from easydict import EasyDict as edict
 from tensorboardX import SummaryWriter
+import pdb
 
 repo_name = 'DER-ClassIL.pytorch'
 base_dir = osp.realpath(".")[:osp.realpath(".").index(repo_name) + len(repo_name)]
@@ -81,7 +82,6 @@ def train(_run, _rnd, _seed):
 def _train(cfg, _run, ex, tensorboard):
     device = factory.set_device(cfg)
     trial_i = cfg['trial']
-
     inc_dataset = factory.get_data(cfg, trial_i)
     ex.logger.info("classes_order")
     ex.logger.info(inc_dataset.class_order)
@@ -128,6 +128,24 @@ def _train(cfg, _run, ex, tensorboard):
         ypred, ytrue = model.eval_task(test_loader)
         acc_stats = utils.compute_accuracy(ypred, ytrue, increments=model._increments, n_classes=model._n_classes)
 
+        if task_i == inc_dataset.n_tasks - 1:
+            myypred = np.argmax(ypred, axis=1)
+            overall_accuracy = ((myypred == ytrue).sum()/len(ytrue))*100
+            ex.logger.info(f"Overall accuracy: {overall_accuracy:.2f}%")
+
+            # generate and save confusion matrix
+            cm = np.zeros((model._n_classes, model._n_classes), dtype=int)
+            for true_label, pred_label in zip(ytrue, myypred):
+                cm[true_label, pred_label] += 1
+            cm_path = osp.join(cfg["exp"]["savedir"], f"confusion_matrix_0429_1.csv")
+            np.savetxt(cm_path, cm, delimiter=",", fmt='%d')
+            ex.logger.info(f"Saved confusion matrix to {cm_path}")
+        
+            #count the number of trainable parameters
+            net = getattr(model, "_network", None)
+            total_params = sum(p.numel() for p in net.parameters() if p.requires_grad)
+            ex.logger.info(f"Total trainable parameters: {total_params}")
+
         #Logging
         model._tensorboard.add_scalar(f"taskaccu/trial{trial_i}", acc_stats["top1"]["total"], task_i)
 
@@ -136,7 +154,7 @@ def _train(cfg, _run, ex, tensorboard):
 
         ex.logger.info(f"top1:{acc_stats['top1']}")
         ex.logger.info(f"top5:{acc_stats['top5']}")
-
+        
         results["results"].append(acc_stats)
 
     top1_avg_acc, top5_avg_acc = results_utils.compute_avg_inc_acc(results["results"])
@@ -149,7 +167,6 @@ def _train(cfg, _run, ex, tensorboard):
     ))
     if cfg["exp"]["name"]:
         results_utils.save_results(results, cfg["exp"]["name"])
-
 
 def do_pretrain(cfg, ex, model, device, train_loader, test_loader):
     if not os.path.exists(osp.join(ex.base_dir, 'pretrain/')):

@@ -49,7 +49,7 @@ postprocessor:
   enable: False
   type: 'bic' #'bic', 'wa'
   epochs: 1
-  batch_size: 32  # Smaller batch size for the smaller dataset
+  batch_size: 50  # Smaller batch size for the smaller dataset
   lr: 0.1
   scheduling:
     - 20
@@ -84,9 +84,9 @@ pretrain:
 dataset: "digits"  # New dataset type
 trial: 0
 increment: 2  # 2 classes per task for 10 digits
-batch_size: 32  # Smaller batch size for simpler dataset
+batch_size: 50  # Smaller batch size for simpler dataset
 workers: 4  # Fewer workers due to smaller dataset
-validation: 0.1  # 10% validation split
+validation: 0.5  # 50% validation split
 random_classes: False
 start_class: 0  # Start with the first 2 digits (0, 1)
 start_task: 0
@@ -95,8 +95,10 @@ max_task: 5  # 5 tasks total (0-1, 2-3, 4-5, 6-7, 8-9)
 #Memory
 coreset_strategy: "random"  # Strategy for selecting exemplars
 mem_size_mode: "uniform_fixed_total_mem"
-memory_size: 200  # Smaller memory size for digits dataset
-fixed_memory_per_cls: 20  # Keep 20 examples per digit
+# memory_size: 70  # Smaller memory size for digits dataset
+memory_size: 0  # Smaller memory size for digits dataset
+fixed_memory_per_cls: 7  # Keep 20 examples per digit
+# fixed_memory_per_cls: 0  # Keep 20 examples per digit
 
 # Misc
 device: 0  # GPU index to use, for cpu use -1

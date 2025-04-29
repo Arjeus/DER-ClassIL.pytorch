@@ -16,6 +16,7 @@ import numpy as np
 import random
 from easydict import EasyDict as edict
 from tensorboardX import SummaryWriter
+import pdb
 
 repo_name = 'DER-ClassIL.pytorch'
 base_dir = osp.realpath(".")[:osp.realpath(".").index(repo_name) + len(repo_name)]
@@ -81,7 +82,7 @@ def train(_run, _rnd, _seed):
 def _train(cfg, _run, ex, tensorboard):
     device = factory.set_device(cfg)
     trial_i = cfg['trial']
-
+    pdb.set_trace()
     inc_dataset = factory.get_data(cfg, trial_i)
     ex.logger.info("classes_order")
     ex.logger.info(inc_dataset.class_order)
